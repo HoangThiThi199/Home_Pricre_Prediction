@@ -2,10 +2,13 @@ import streamlit as st
 import joblib
 import pandas as pd
 import numpy as np
+import os
 
-model = joblib.load('model/house_price_model.pkl')
-scaler = joblib.load('model/scaler.pkl')
-feature_columns = joblib.load('model/feature_columns.pkl')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model = joblib.load(os.path.join(BASE_DIR, 'model', 'house_price_model.pkl'))
+scaler = joblib.load(os.path.join(BASE_DIR, 'model', 'scaler.pkl'))
+feature_columns = joblib.load(os.path.join(BASE_DIR, 'model', 'feature_columns.pkl'))
 
 st.title("House price prediction")
 
