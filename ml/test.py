@@ -1,11 +1,10 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import numpy as np
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+
+# Import các trang từ thư mục views nằm trong ml/
+from views import prediction, history, settings, help_center, contact
 
 st.set_page_config(
     page_title="Proptech Intelligence - Real Estate Valuation",
@@ -56,9 +55,7 @@ if 'logged_in' not in st.session_state:
 if 'user_email' not in st.session_state:
     st.session_state.user_email = ""
 
-# Lưu danh sách tài khoản đăng ký tạm thời trong session
 if 'database_users' not in st.session_state:
-    # Tài khoản mẫu mặc định: email "admin@gmail.com" - mật khẩu "123456"
     st.session_state.database_users = {"admin@gmail.com": "123456"}
 
 if 'page' not in st.session_state:
@@ -76,8 +73,7 @@ if 'settings_history' not in st.session_state:
 if 'settings_model_version' not in st.session_state:
     st.session_state.settings_model_version = "XGBoost_Ames_v1.2"
 
-
-#MÀN HÌNH SIGN IN / SIGN UP
+# MÀN HÌNH SIGN IN / SIGN UP
 if not st.session_state.logged_in:
     st.markdown("<br><br>", unsafe_allow_html=True)
     col_space1, col_auth, col_space2 = st.columns([2, 3, 2])
@@ -111,7 +107,6 @@ if not st.session_state.logged_in:
                 elif email_input in st.session_state.database_users:
                     st.error("This email is already registered. Please sign in instead.")
                 else:
-                    # Lưu tài khoản mới vào danh sách
                     st.session_state.database_users[email_input] = password_input
                     st.session_state.logged_in = True
                     st.session_state.user_email = email_input
@@ -120,8 +115,7 @@ if not st.session_state.logged_in:
                     
     st.stop()
 
-
-#GIAO DIỆN CHÍNH (SAU KHI ĐĂNG NHẬP)
+# GIAO DIỆN CHÍNH (SAU KHI ĐĂNG NHẬP)
 col_top1, col_top2 = st.columns([10, 2])
 with col_top1:
     st.caption(f"Connected as: **{st.session_state.user_email}**")
@@ -152,167 +146,14 @@ with st.sidebar:
     if st.button("📞 Contact Support", use_container_width=True):
         st.session_state.page = 'contact'
 
+# ĐIỀU HƯỚNG HIỂN THỊ CÁC TRANG
 if st.session_state.page == 'prediction':
-    st.title("Real Estate Valuation Predictor")
-    st.write("Enter property details to receive accurate valuation reports based on real-time market data.")
-    st.write("")
-
-    col_form, col_result = st.columns([7, 5], gap="large")
-
-    with col_form:
-        st.subheader("🏠 Property Specifications")
-        
-        overall_qual = st.slider("Overall Quality (OverallQual)", 1, 10, 5)
-        total_sf = st.number_input("Total Area (TotalSF - sqft)", min_value=300, max_value=10000, value=1500)
-        garage_cars = st.slider("Garage Capacity (GarageCars)", 0, 4, 2)
-        
-        central_air = st.selectbox("Central Air Conditioning (CentralAir)", ["Yes", "No"])
-        kitchen_qual = st.selectbox("Kitchen Quality (KitchenQual)", ["Excellent", "Good", "Average/Typical", "Fair", 'Poor'])
-        exter_qual = st.selectbox("Exterior Quality (ExterQual)", ["Excellent", "Good", "Average/Typical", "Fair", 'Poor'])
-        
-        st.write("")
-        predict_btn = st.button("Predict Now", type="primary", use_container_width=True)
-
-    with col_result:
-        st.write("")
-        st.write("")
-        st.write("")
-        
-        st.subheader("📊 Estimated Value")
-        
-        if predict_btn:
-            input_data = pd.DataFrame([baseline_values])
-            input_data = input_data[feature_columns]
-            
-            input_data.loc[0, 'OverallQual'] = overall_qual
-            input_data.loc[0, 'TotalSF'] = total_sf
-            input_data.loc[0, 'GarageCars'] = garage_cars
-            
-            if 'CentralAir_Y' in input_data.columns:
-                input_data.loc[0, 'CentralAir_Y'] = 1 if central_air == "Yes" else 0
-                
-            for col in input_data.columns:
-                if f"KitchenQual_{kitchen_qual}" in col:
-                    input_data.loc[0, col] = 1
-                    
-            for col in input_data.columns:
-                if f"ExterQual_{exter_qual}" in col:
-                    input_data.loc[0, col] = 1
-
-            input_scaled = scaler.transform(input_data)
-            prediction_log = model.predict(input_scaled)
-            
-            price_usd = np.expm1(prediction_log[0])
-            price_billions = price_usd / 1_000_000_000
-            
-            if price_billions >= 1.0:
-                val_str = f"{price_billions:.2f} billion USD"
-                range_str = f"{(price_billions*0.95):.1f} - {(price_billions*1.05):.1f} billion USD"
-            else:
-                val_str = f"{price_usd:,.0f} USD"
-                range_str = f"{(price_usd*0.95):,.0f} - {(price_usd*1.05):,.0f} USD"
-
-            st.metric(label="ESTIMATED VALUE", value=val_str, delta="Confidence: High (93%)")
-            st.write(f"**Expected Price Range:** {range_str}")
-            
-            st.markdown("---")
-            st.markdown("📈 **Neighborhood Trends:** ")
-            st.markdown("⏱️ **Time on Market:**")
-            
-            if st.session_state.settings_history:
-                st.session_state.history_list.append({
-                    "Quality": overall_qual,
-                    "Total Area (sqft)": total_sf,
-                    "Garage Cars": garage_cars,
-                    "Estimated Value": val_str
-                })
-        else:
-            st.info("👈 Fill in the property specifications on the left and click **'Predict Now'** to see the valuation.")
-
+    prediction.render(model, scaler, feature_columns, baseline_values)
 elif st.session_state.page == 'history':
-    st.title("🕒 Prediction History")
-    st.write("List of recent property valuations in your current session:")
-    
-    if st.session_state.settings_history:
-        if len(st.session_state.history_list) > 0:
-            df_history = pd.DataFrame(st.session_state.history_list)
-            st.dataframe(df_history, use_container_width=True)
-        else:
-            st.info("No valuation history found. Go back to **New Prediction** and run a prediction first!")
-    else:
-        st.warning("History saving is currently disabled in **Settings**.")
-
+    history.render()
 elif st.session_state.page == 'settings':
-    st.title("⚙️ System Settings")
-    st.write("Configure machine learning model parameters and application preferences:")
-    
-    temp_stream = st.checkbox("Enable Real-time Market Data Stream", value=st.session_state.settings_stream)
-    temp_history = st.checkbox("Automatically Save Search History", value=st.session_state.settings_history)
-    temp_model_version = st.text_input("Active Model Version", value=st.session_state.settings_model_version)
-    
-    if st.button("Save Changes"):
-        st.session_state.settings_stream = temp_stream
-        st.session_state.settings_history = temp_history
-        st.session_state.settings_model_version = temp_model_version
-        st.success("Settings saved successfully!")
-
+    settings.render()
 elif st.session_state.page == 'help':
-    st.title("📖 Help Center")
-    st.markdown("Welcome to the **Proptech Intelligence** Help Center.")
-    st.markdown("### Frequently Asked Questions")
-    st.markdown("1. **How does the prediction model work?**")
-    st.write("The system uses an advanced XGBoost Machine Learning model trained on real estate datasets to estimate property values based on key features like quality, total area, and amenities.")
-    st.markdown("2. **How to interpret the confidence score?**")
-    st.write("A higher confidence percentage indicates that the input specifications closely match standard historical distribution ranges.")
-
+    help_center.render()
 elif st.session_state.page == 'contact':
-    st.title("📞 Contact Support")
-    st.markdown("Need technical assistance or have questions about the valuation report? Get in touch with our team.")
-    st.info("📧 Email: hoangthithi19906@gmail.com.com")
-    st.info("☎️ Hotline: 12345678")
-    st.write("")
-    
-    name_input = st.text_input("Your Name")
-    email_input = st.text_input("Your Email", value=st.session_state.user_email)
-    message_input = st.text_area("Describe your issue or inquiry")
-    
-    if st.button("Send Message"):
-        if not name_input or not email_input or not message_input:
-            st.warning("Please fill in all fields before sending!")
-        else:
-            try:
-                SENDER_EMAIL = "hoangthithi19906@gmail.com"  
-                SENDER_PASSWORD = "tscx fitv oarc wcmr"       
-                RECEIVER_EMAIL = "hoangthithi19906@gmail.com" 
-                
-                # 1. GỬI THƯ BÁO VỀ CHO ADMIN
-                msg_to_admin = MIMEMultipart()
-                msg_to_admin['From'] = SENDER_EMAIL
-                msg_to_admin['To'] = RECEIVER_EMAIL
-                msg_to_admin['Subject'] = f"[Proptech Support] Message from {name_input}"
-                
-                body_admin = f"--- THÔNG TIN NGƯỜI GỬI ---\n- Tên: {name_input}\n- Email: {email_input}\n\n--- NỘI DUNG ---\n{message_input}"
-                msg_to_admin.attach(MIMEText(body_admin, 'plain', 'utf-8'))
-                
-                # 2. GỬI THƯ TỰ ĐỘNG XÁC NHẬN (AUTO-REPLY) CHO KHÁCH HÀNG 
-                msg_to_user = MIMEMultipart()
-                msg_to_user['From'] = SENDER_EMAIL
-                msg_to_user['To'] = email_input 
-                msg_to_user['Subject'] = "[Proptech Intelligence] We have received your support request!"
-                
-                body_user = f"Hi {name_input},\n\nThank you for contacting Proptech Intelligence Support! We have received your message and will review it shortly.\n\nBest regards,\nProptech Support Team"
-                msg_to_user.attach(MIMEText(body_user, 'plain', 'utf-8'))
-                
-                # 3. KẾT NỐI SMTP VÀ GỬI CẢ HAI THƯ 
-                server = smtplib.SMTP('smtp.gmail.com', 587)
-                server.starttls()
-                server.login(SENDER_EMAIL, SENDER_PASSWORD)
-                
-                server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg_to_admin.as_string())
-                server.sendmail(SENDER_EMAIL, email_input, msg_to_user.as_string())
-                
-                server.quit()
-                
-                st.success("Your message has been sent successfully! A confirmation email has also been sent to your inbox.")
-            except Exception as e:
-                st.error(f"Failed to send email. Please check your App Password configuration. Error: {e}")
+    contact.render()
