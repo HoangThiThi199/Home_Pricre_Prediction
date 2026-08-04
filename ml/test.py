@@ -14,10 +14,18 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 @st.cache_resource
 def load_assets():
-    model = joblib.load(os.path.join(BASE_DIR, 'model', 'best_xgb_model.pkl'))
+    # Sửa lại đúng tên file 'house_price_model.pkl' đang có trong thư mục model của bạn
+    model = joblib.load(os.path.join(BASE_DIR, 'model', 'house_price_model.pkl'))
     scaler = joblib.load(os.path.join(BASE_DIR, 'model', 'scaler.pkl'))
     feature_columns = joblib.load(os.path.join(BASE_DIR, 'model', 'feature_columns.pkl'))
-    baseline_values = joblib.load(os.path.join(BASE_DIR, 'model', 'baseline_values.pkl'))
+    
+    # Kiểm tra nếu chưa có file baseline_values.pkl thì tạo tạm bằng 0 để app không bị crash
+    baseline_path = os.path.join(BASE_DIR, 'model', 'baseline_values.pkl')
+    if os.path.exists(baseline_path):
+        baseline_values = joblib.load(baseline_path)
+    else:
+        baseline_values = pd.Series(0, index=feature_columns)
+        
     return model, scaler, feature_columns, baseline_values
 
 model, scaler, feature_columns, baseline_values = load_assets()
