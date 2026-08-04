@@ -12,11 +12,11 @@ feature_columns = joblib.load(os.path.join(BASE_DIR, 'model', 'feature_columns.p
 
 st.title("House price prediction")
 
-# Form nhập liệu 
+# Form nhập
 overall_qual = st.slider("Overall_qual(1-10)", 1, 10, 5)
 gr_liv_area = st.number_input("gr_liv_area (sqft)", min_value=300, max_value=6000, value=1500)
 garage_cars = st.slider("garage_cars", 0, 4, 2)
-total_bsmt_sf = st.number_input("Diện tích tầng hầm (sqft)", min_value=0, max_value=3000, value=800)
+total_bsmt_sf = st.number_input("Total square feet of basement area (sqft)", min_value=0, max_value=3000, value=800)
 year_built = st.number_input("year_built", min_value=1870, max_value=2026, value=2000)
 
 if st.button("Predict your house"):
@@ -29,6 +29,6 @@ if st.button("Predict your house"):
     input_data['YearBuilt'] = year_built
 
     input_scaled = scaler.transform(input_data)
-    prediction = model.predict(input_scaled)
-
-    st.success(f"Predicted Price: {prediction[0]:,.0f} USD")
+    prediction_log = model.predict(input_scaled)
+    prediction_real = np.expm1(prediction_log[0])
+    st.success(f"Predicted Price: {prediction_real:,.0f} USD")
