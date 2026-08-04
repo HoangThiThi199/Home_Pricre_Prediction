@@ -77,7 +77,7 @@ if 'settings_model_version' not in st.session_state:
     st.session_state.settings_model_version = "XGBoost_Ames_v1.2"
 
 
-# --- MÀN HÌNH SIGN IN / SIGN UP ---
+#MÀN HÌNH SIGN IN / SIGN UP
 if not st.session_state.logged_in:
     st.markdown("<br><br>", unsafe_allow_html=True)
     col_space1, col_auth, col_space2 = st.columns([2, 3, 2])
@@ -121,7 +121,7 @@ if not st.session_state.logged_in:
     st.stop()
 
 
-# --- GIAO DIỆN CHÍNH (SAU KHI ĐĂNG NHẬP) ---
+#GIAO DIỆN CHÍNH (SAU KHI ĐĂNG NHẬP)
 col_top1, col_top2 = st.columns([10, 2])
 with col_top1:
     st.caption(f"Connected as: **{st.session_state.user_email}**")
@@ -167,8 +167,8 @@ if st.session_state.page == 'prediction':
         garage_cars = st.slider("Garage Capacity (GarageCars)", 0, 4, 2)
         
         central_air = st.selectbox("Central Air Conditioning (CentralAir)", ["Yes", "No"])
-        kitchen_qual = st.selectbox("Kitchen Quality (KitchenQual)", ["Ex", "Gd", "TA", "Fa"])
-        exter_qual = st.selectbox("Exterior Quality (ExterQual)", ["Ex", "Gd", "TA", "Fa"])
+        kitchen_qual = st.selectbox("Kitchen Quality (KitchenQual)", ["Excellent", "Good", "Average/Typical", "Fair", 'Poor'])
+        exter_qual = st.selectbox("Exterior Quality (ExterQual)", ["Excellent", "Good", "Average/Typical", "Fair", 'Poor'])
         
         st.write("")
         predict_btn = st.button("Predict Now", type="primary", use_container_width=True)
@@ -207,17 +207,17 @@ if st.session_state.page == 'prediction':
             
             if price_billions >= 1.0:
                 val_str = f"{price_billions:.2f} billion USD"
-                range_str = f"{(price_billions*0.95):.1f} - {(price_billions*1.05):.1f} billion"
+                range_str = f"{(price_billions*0.95):.1f} - {(price_billions*1.05):.1f} billion USD"
             else:
                 val_str = f"{price_usd:,.0f} USD"
-                range_str = f"${(price_usd*0.95):,.0f} - ${(price_usd*1.05):,.0f}"
+                range_str = f"{(price_usd*0.95):,.0f} - {(price_usd*1.05):,.0f} USD"
 
             st.metric(label="ESTIMATED VALUE", value=val_str, delta="Confidence: High (93%)")
             st.write(f"**Expected Price Range:** {range_str}")
             
             st.markdown("---")
-            st.markdown("📈 **Neighborhood Trends:** +5.2% in the last 6 months")
-            st.markdown("⏱️ **Time on Market:** ~45 days")
+            st.markdown("📈 **Neighborhood Trends:** ")
+            st.markdown("⏱️ **Time on Market:**")
             
             if st.session_state.settings_history:
                 st.session_state.history_list.append({
@@ -269,7 +269,7 @@ elif st.session_state.page == 'contact':
     st.title("📞 Contact Support")
     st.markdown("Need technical assistance or have questions about the valuation report? Get in touch with our team.")
     st.info("📧 Email: hoangthithi19906@gmail.com.com")
-    st.info("☎️ Hotline: +1 (555) 019-2834")
+    st.info("☎️ Hotline: 12345678")
     st.write("")
     
     name_input = st.text_input("Your Name")
@@ -290,7 +290,7 @@ elif st.session_state.page == 'contact':
                 msg['To'] = RECEIVER_EMAIL
                 msg['Subject'] = f"[Proptech Support] Message from {name_input}"
                 
-                body = f"--- THÔNG TIN NGƯỜI GỬI ---\n- Tên: {name_input}\n- Email: {email_input}\n\n--- NỘI DUNG ---\n{message_input}"
+                body = f"THÔNG TIN NGƯỜI GỬI\n- Tên: {name_input}\n- Email: {email_input}\n\n--- NỘI DUNG ---\n{message_input}"
                 msg.attach(MIMEText(body, 'plain'))
                 
                 server = smtplib.SMTP('smtp.gmail.com', 587)
