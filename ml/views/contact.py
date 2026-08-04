@@ -19,9 +19,9 @@ def render():
             st.warning("Please fill in all fields before sending!")
         else:
             try:
-                SENDER_EMAIL = "hoangthithi19906@gmail.com"  
-                SENDER_PASSWORD = "tscx fitv oarc wcmr"       
-                RECEIVER_EMAIL = "hoangthithi19906@gmail.com" 
+                SENDER_EMAIL = st.secrets["SENDER_EMAIL"]
+                SENDER_PASSWORD = st.secrets["SENDER_PASSWORD"]
+                RECEIVER_EMAIL = st.secrets["SENDER_EMAIL"]
                 
                 # 1. GỬI THƯ BÁO VỀ CHO ADMIN
                 msg_to_admin = MIMEMultipart()
