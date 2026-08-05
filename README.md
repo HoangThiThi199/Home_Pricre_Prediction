@@ -102,5 +102,6 @@ Python, pandas, NumPy, scikit-learn, XGBoost, SHAP, Streamlit.
 ```bash
 pip install -r ml/requirements.txt
 streamlit run ml/test.py
-
+or
+https://houseprice-prediction-thydtt.streamlit.app/
 ```
