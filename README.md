@@ -63,7 +63,7 @@ Hyperparameters for the best model were optimized via 5-fold cross-validated gri
 * No explicit spatial modeling (e.g., geocoordinates, spatial autocorrelation) despite `Neighborhood` being a strong categorical proxy.
 
 ## 5. Repository Structure
-
+```text
 HOUSE-PRICE-PREDICTION/
 ├── .devcontainer/
 ├── ml/
@@ -92,7 +92,7 @@ HOUSE-PRICE-PREDICTION/
 ├── .gitattributes
 ├── .gitignore
 └── README.md
-
+```
 ## 6. Tech Stack
 
 Python, pandas, NumPy, scikit-learn, XGBoost, SHAP, Streamlit.
